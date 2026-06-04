@@ -1,0 +1,6 @@
+[package]
+name = "ternary-som"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Self-organizing maps for ternary data with competitive learning, neighborhood functions, and U-matrix visualization"
