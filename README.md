@@ -92,6 +92,20 @@ fn main() {
 - **Codebook generation**: Learn a compact ternary codebook from raw ternary data for compression or quantization.
 - **Anomaly detection**: Identify inputs with high quantization error as outliers in ternary data streams.
 
+## Known Limitations
+
+- **Weight initialization is deterministic and input-independent**: `SomNode::new()` initializes weights as `((i × 0.1) % 3.0) − 1.0` for each dimension `i`. This means every SOM trained with the same grid dimensions starts with identical weights, regardless of the input data distribution. There is no random initialization or PCA-based seeding option.
+
+- **No batch training shuffle**: `TernarySOM::train()` iterates the training data in the same order every epoch. Without shuffling, the SOM can develop directional biases — nodes toward the end of the training set's pattern distribution get preferentially mapped.
+
+- **`from_f64()` quantization thresholds are hardcoded**: `Trit::from_f64()` uses fixed thresholds at ±0.33. These are not configurable and may not be optimal for all weight distributions. After many training iterations, weights can drift well outside [−1, 1], making the ±0.33 thresholds produce mostly `Neg` or `Pos` quantized values.
+
+- **`topographic_error()` only checks 4-connectivity**: The BMU and second-BMU must be adjacent in the 4-connected sense (up/down/left/right). Diagonal neighbors are not considered adjacent, which can inflate the topographic error for small grids where diagonal adjacency matters.
+
+- **`umatrix()` returns distances, not normalized values**: The U-matrix values are raw average distances to neighbors, which can vary widely in magnitude. There is no normalization option (min-max, z-score) — you must normalize externally for visualization.
+
+- **`decay()` applies multiplicative decay with no floor**: Calling `decay(0.9)` multiplies learning rate and sigma by 0.9. After many decays, sigma can approach 0, making the neighborhood function so narrow that only the BMU itself is updated — equivalent to k-means with no smoothing.
+
 ## Ecosystem
 
 Part of the **SuperInstance** ternary computing suite:
